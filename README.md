@@ -9,12 +9,12 @@ This guide explains only how to run sweeps on AAU AI-Lab using the built-in scri
 - override all hyperparameter lists  
 - monitor jobs and view outputs  
 
-You do **not** edit the Python code or `.sh` scripts.  
+You do not edit the Python code or `.sh` scripts.  
 You only change:
 
-- your AAU **username**
-- your AAU **email**
-- optional **W&B settings**
+- your AAU username
+- your AAU email
+- optional W&B settings
 - optional hyperparameter ranges when launching a sweep
 
 ---
@@ -109,7 +109,7 @@ This will:
 
 # 5. Override Hyperparameters 
 
-You can override **any** parameter list directly when launching the sweep.
+You can override any parameter list directly when launching the sweep.
 
 Example overriding *all* lists:
 
