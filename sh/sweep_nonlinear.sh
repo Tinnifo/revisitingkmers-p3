@@ -8,11 +8,10 @@ BATCH_SIZES=(10000 20000)
 
 BASE_SEED=26042024
 
-# WandB settings for all runs
-export USE_WANDB=1
-export WANDB_PROJECT="revisitingkmers"
-export WANDB_ENTITY=""          # set to your wandb username/team if needed
-export WANDB_MODE="online"      # or "offline"/"disabled"
+# WandB settings for all runs in this sweep
+export WANDB_PROJECT="P3-Run1"
+export WANDB_ENTITY="tinnifo"
+export WANDB_MODE="online"   # or "offline"/"disabled"
 
 for K in "${KS[@]}"; do
   for DIM in "${DIMS[@]}"; do
@@ -21,7 +20,7 @@ for K in "${KS[@]}"; do
 
         SEED=$((BASE_SEED + K + DIM))
 
-        # Tags for this particular run
+        # Per-run W&B metadata
         WANDB_TAGS="sweep,nonlinear,k=${K},dim=${DIM},lr=${LR},bs=${BATCH_SIZE}"
         WANDB_RUN_NAME="nonlinear_k${K}_d${DIM}_lr${LR}_bs${BATCH_SIZE}_seed${SEED}"
 

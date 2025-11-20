@@ -19,21 +19,39 @@ SCRIPT_PATH=$BASEFOLDER/src/nonlinear.py
 DATA_DIR=/ceph/project/p3-kmer/dataset
 INPUT_PATH=$DATA_DIR/train_2m.csv
 
-POSTFIX=""
-K=4
-DIM=256
-EPOCHNUM=300
-LR=0.001
-NEGSAMPLEPERPOS=200
-BATCH_SIZE=10000
-MAXREADNUM=100000
-SEED=26042024
-CHECKPOINT=0
+# ---------------- Hyperparameters (overridable by env) ----------------
+K=${K:-4}
+DIM=${DIM:-256}
+EPOCHNUM=${EPOCHNUM:-300}
+LR=${LR:-0.001}
+NEGSAMPLEPERPOS=${NEGSAMPLEPERPOS:-200}
+BATCH_SIZE=${BATCH_SIZE:-10000}
+MAXREADNUM=${MAXREADNUM:-100000}
+SEED=${SEED:-26042024}
+CHECKPOINT=${CHECKPOINT:-0}
+LOSS_NAME=${LOSS_NAME:-"bern"}
+WORKERS_NUM=${WORKERS_NUM:-1}
+DEVICE=${DEVICE:-"cuda"}
+POSTFIX=${POSTFIX:-""}
+# ----------------------------------------------------------------------
+
+# ---------------- Weights & Biases settings ----------------
+WANDB_PROJECT=${WANDB_PROJECT:-"P3-Run1"}
+WANDB_ENTITY=${WANDB_ENTITY:-"tinnifo"}
+WANDB_MODE=${WANDB_MODE:-"online"}      # online / offline / disabled
+WANDB_TAGS=${WANDB_TAGS:-""}            # e.g. "sweep,nonlinear"
+WANDB_RUN_NAME=${WANDB_RUN_NAME:-"nonlinear_k${K}_d${DIM}_lr${LR}_bs${BATCH_SIZE}_seed${SEED}"}
+# -----------------------------------------------------------
 
 mkdir -p "$BASEFOLDER/models"
 
 OUTPUT_PATH=$BASEFOLDER/models/${MODELNAME}_train_2m_k=${K}_d=${DIM}_negsampleperpos=${NEGSAMPLEPERPOS}
 OUTPUT_PATH=${OUTPUT_PATH}_epoch=${EPOCHNUM}_LR=${LR}_batch=${BATCH_SIZE}_maxread=${MAXREADNUM}_seed=${SEED}${POSTFIX}.model
+
+echo "Running with:"
+echo "  K=$K DIM=$DIM LR=$LR BATCH_SIZE=$BATCH_SIZE MAXREADNUM=$MAXREADNUM SEED=$SEED"
+echo "  W&B: project=$WANDB_PROJECT entity=$WANDB_ENTITY run=$WANDB_RUN_NAME"
+echo "  Output model: $OUTPUT_PATH"
 
 singularity exec --nv \
     -B "$VENV":/scratch/venv \
@@ -44,13 +62,22 @@ singularity exec --nv \
         python $SCRIPT_PATH \
             --input /scratch/dataset/train_2m.csv \
             --k $K \
-            --epoch $EPOCHNUM \
-            --lr $LR \
+            --dim $DIM \
             --neg_sample_per_pos $NEGSAMPLEPERPOS \
             --max_read_num $MAXREADNUM \
+            --epoch $EPOCHNUM \
+            --lr $LR \
             --batch_size $BATCH_SIZE \
-            --device cuda \
+            --device $DEVICE \
+            --workers_num $WORKERS_NUM \
+            --loss_name $LOSS_NAME \
             --output $OUTPUT_PATH \
             --seed $SEED \
-            --checkpoint $CHECKPOINT
+            --checkpoint $CHECKPOINT \
+            --use_wandb \
+            --wandb_project \"$WANDB_PROJECT\" \
+            --wandb_entity \"$WANDB_ENTITY\" \
+            --wandb_run_name \"$WANDB_RUN_NAME\" \
+            --wandb_mode \"$WANDB_MODE\" \
+            --wandb_tags \"$WANDB_TAGS\"
     "
