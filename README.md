@@ -210,20 +210,3 @@ W&B run dashboard:
 
 https://wandb.ai/YOUR_ENTITY/YOUR_PROJECT
 
-
----
-
-# 9. Sweep Workflow Diagram
-
-A[Start sweep\nsh/sweep_nonlinear.sh] --> B[Loop over hyperparameter sets]
-
-B --> C[Generate WANDB_RUN_ID]
-C --> D[Submit TRAIN job\nsbatch sh/run_nonlinear.sh]
-D -->E[TRAIN job runs\nnonlinear.py → model saved]
-
-D --> F[Submit EVAL job\nsbatch --dependency=afterok:TRAIN]
-F --> G[EVAL job runs\nevaluation/binning.py → metrics saved]
-
-E -->|if W&B enabled| H[wandb.log training]
-G -->|if W&B enabled| I[wandb.log evaluation]
-
