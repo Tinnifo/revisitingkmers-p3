@@ -15,6 +15,11 @@ from evaluation.utils import (
     compute_class_center_medium_similarity,
 )
 
+try:
+    import wandb
+except ImportError:
+    wandb = None
+
 csv.field_size_limit(sys.maxsize)
 csv.field_size_limit(sys.maxsize)
 MAX_SEQ_LEN = 20000
@@ -23,6 +28,43 @@ MIN_ABUNDANCE_VALUE = 10
 
 
 def main(args):
+    wandb_run = None
+    if args.use_wandb:
+        if wandb is None:
+            raise RuntimeError(
+                "Weights & Biases is not installed but --use_wandb was provided."
+            )
+        wandb_kwargs = {
+            "project": args.wandb_project,
+            "entity": args.wandb_entity,
+            "name": args.wandb_run_name,
+            "mode": args.wandb_mode,
+        }
+        wandb_kwargs = {k: v for k, v in wandb_kwargs.items() if v}
+        tags = None
+        if args.wandb_tags:
+            tags = [
+                tag.strip()
+                for tag in args.wandb_tags.split(",")
+                if tag.strip()
+            ]
+            if tags:
+                wandb_kwargs["tags"] = tags
+        if args.wandb_run_id:
+            wandb_kwargs["id"] = args.wandb_run_id
+            wandb_kwargs["resume"] = args.wandb_resume
+        wandb_run = wandb.init(**wandb_kwargs)
+        wandb_run.config.update(
+            {
+                "eval_species": args.species,
+                "eval_samples": args.samples,
+                "eval_model_list": args.model_list,
+                "eval_suffix": args.suffix,
+                "eval_metric_override": args.metric,
+            },
+            allow_val_change=True,
+        )
+
     model_list = args.model_list.split(",")
     for model_name in model_list:
         for species in args.species.split(","):
@@ -181,6 +223,23 @@ def main(args):
                     f.write(f"f1_results: {f1_results}\n")
                     f.write(f"threshold: {threshold}\n\n")
 
+                if wandb_run is not None:
+                    metrics = {
+                        "eval/species": species,
+                        "eval/sample": sample,
+                        "eval/model_name": model_name,
+                        "eval/threshold": threshold,
+                        "eval/num_sequences": len(dna_sequences),
+                        "eval/num_clusters": num_clusters,
+                    }
+                    for i, thr in enumerate(thresholds):
+                        metrics[f"eval/recall_bins_above_{thr}"] = recall_results[i]
+                        metrics[f"eval/f1_bins_above_{thr}"] = f1_results[i]
+                    wandb_run.log(metrics)
+
+    if wandb_run is not None:
+        wandb_run.finish()
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Evaluate clustering")
@@ -227,6 +286,53 @@ if __name__ == "__main__":
         type=str,
         default="",
         help="Suffix to add to the output embedding file",
+    )
+    parser.add_argument(
+        "--use_wandb",
+        action="store_true",
+        help="If set, log evaluation metrics to Weights & Biases",
+    )
+    parser.add_argument(
+        "--wandb_project",
+        type=str,
+        default=None,
+        help="W&B project name",
+    )
+    parser.add_argument(
+        "--wandb_entity",
+        type=str,
+        default=None,
+        help="W&B entity/user",
+    )
+    parser.add_argument(
+        "--wandb_run_name",
+        type=str,
+        default=None,
+        help="Run name to use in W&B",
+    )
+    parser.add_argument(
+        "--wandb_run_id",
+        type=str,
+        default=None,
+        help="Optional run ID to resume/append metrics to",
+    )
+    parser.add_argument(
+        "--wandb_mode",
+        type=str,
+        default="online",
+        help="W&B mode (online/offline/disabled)",
+    )
+    parser.add_argument(
+        "--wandb_tags",
+        type=str,
+        default=None,
+        help="Comma separated list of tags",
+    )
+    parser.add_argument(
+        "--wandb_resume",
+        type=str,
+        default="allow",
+        help="W&B resume strategy when a run_id is provided",
     )
     args = parser.parse_args()
     main(args)
