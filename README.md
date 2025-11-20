@@ -1,4 +1,4 @@
-````markdown
+markdown
 # Revisiting K-mers — Sweep Workflow (AAU AI-Lab)
 
 This guide explains only how to run sweeps on AAU AI-Lab using the built-in scripts:
@@ -9,7 +9,7 @@ This guide explains only how to run sweeps on AAU AI-Lab using the built-in scri
 - override all hyperparameter lists  
 - monitor jobs and view outputs  
 
-You do not edit the Python code or `.sh` scripts.  
+You do not edit the Python code or .sh scripts.  
 You only change:
 
 - your AAU username
@@ -23,19 +23,19 @@ You only change:
 
 SSH to AI-Lab:
 
-```bash
+bash
 ssh YOUR_USERNAME@student.aau.dk@ailab-fe01.srv.aau.dk
-````
+
 
 Clone:
 
-```bash
+bash
 cd /ceph/home/student.aau.dk/YOUR_USERNAME
 git clone https://github.com/Tinnifo/revisitingkmers-p3.git
 cd revisitingkmers-p3
-```
 
-Replace `YOUR_USERNAME` with your AAU username.
+
+Replace YOUR_USERNAME with your AAU username.
 
 ---
 
@@ -44,16 +44,16 @@ Replace `YOUR_USERNAME` with your AAU username.
 Both sweep-dependent scripts send email notifications.
 Update the following line in each script:
 
-```
+
 sh/run_nonlinear.sh
 sh/evaluate_nonlinear.sh
-```
+
 
 Change:
 
-```bash
+bash
 #SBATCH --mail-user=YOUR_EMAIL@student.aau.dk
-```
+
 
 Replace with your AAU email.
 
@@ -63,29 +63,29 @@ Replace with your AAU email.
 
 Add your API key:
 
-```bash
+bash
 nano ~/.bashrc
-```
+
 
 Add:
 
-```bash
+bash
 export WANDB_API_KEY="YOUR_WANDB_API_KEY"
-```
+
 
 Reload:
 
-```bash
+bash
 source ~/.bashrc
-```
+
 
 Install wandb inside the container environment:
 
-```bash
+bash
 srun --mem=8G --time=00:05:00 \
   singularity exec --nv /ceph/container/pytorch/pytorch_24.09.sif \
   pip install --user wandb
-```
+
 
 ---
 
@@ -93,9 +93,9 @@ srun --mem=8G --time=00:05:00 \
 
 Inside the repo:
 
-```bash
+bash
 sh sh/sweep_nonlinear.sh
-```
+
 
 This will:
 
@@ -113,7 +113,7 @@ You can override any parameter list directly when launching the sweep.
 
 Example overriding *all* lists:
 
-```bash
+bash
 K_LIST="4 6" \
 DIM_LIST="64 128 256" \
 LR_LIST="0.001 0.0005" \
@@ -129,14 +129,14 @@ WANDB_PROJECT="my_kmer_sweep" \
 WANDB_ENTITY="my_wandb_user" \
 WANDB_TAGS="sweep,kmers" \
 sh sh/sweep_nonlinear.sh
-```
+
 
 The sweep script will automatically:
 
 * iterate through all combinations
-* assign a unique `WANDB_RUN_ID` for each
+* assign a unique WANDB_RUN_ID for each
 * submit training jobs
-* submit matching evaluation jobs with `--dependency=afterok`
+* submit matching evaluation jobs with --dependency=afterok
 
 ---
 
@@ -144,50 +144,50 @@ The sweep script will automatically:
 
 ### Small sweep
 
-```bash
+bash
 K_LIST="4 5" \
 DIM_LIST="64 128" \
 sh sh/sweep_nonlinear.sh
-```
+
 
 ### Sweep with W&B enabled
 
-```bash
+bash
 USE_WANDB=1 \
 WANDB_PROJECT="p3-experiments" \
 WANDB_ENTITY="myname" \
 K_LIST="4 8" \
 DIM_LIST="128 256" \
 sh sh/sweep_nonlinear.sh
-```
+
 
 ### Single experiment via sweep script
 
-```bash
+bash
 K_LIST="4" \
 DIM_LIST="256" \
 LR_LIST="0.001" \
 USE_WANDB=1 \
 sh sh/sweep_nonlinear.sh
-```
+
 
 ---
 
 # 7. Monitoring Jobs
 
-```bash
+bash
 squeue -u $(whoami)
-```
+
 
 Logs:
 
-```bash
+bash
 tail -n 40 MODEL_*.out
 tail -n 40 MODEL_*.err
 
 tail -n 40 EVALUATION_*.out
 tail -n 40 EVALUATION_*.err
-```
+
 
 ---
 
@@ -195,21 +195,21 @@ tail -n 40 EVALUATION_*.err
 
 Models:
 
-```
+
 models/
-```
+
 
 Evaluation results:
 
-```
+
 results/<species>/
-```
+
 
 W&B run dashboard:
 
-```
+
 https://wandb.ai/YOUR_ENTITY/YOUR_PROJECT
-```
+
 
 ---
 
@@ -226,4 +226,4 @@ F --> G[EVAL job runs\nevaluation/binning.py → metrics saved]
 
 E -->|if W&B enabled| H[wandb.log training]
 G -->|if W&B enabled| I[wandb.log evaluation]
-```
+
