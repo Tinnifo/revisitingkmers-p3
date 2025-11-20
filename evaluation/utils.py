@@ -2,14 +2,10 @@
 # https://github.com/MAGICS-LAB/DNABERT_S/blob/main/evaluate/eval_binning.py
 import numpy as np
 import torch
-import torch.utils.data as util_data
 import torch.nn as nn
-import tqdm
 import os
 from scipy.spatial import distance
-import itertools
 from sklearn.preprocessing import normalize
-from src.poisson_model import PoissonModel
 from src.nonlinear import NonLinearModel
 from scipy.optimize import linear_sum_assignment
 
@@ -134,122 +130,6 @@ def get_embedding(
             np.save(f, embedding)
 
     return embedding
-
-
-def calculate_tnf(dna_sequences, kernel=False, k=4):
-    # Define all possible tetra-nucleotides
-    nucleotides = ["A", "T", "C", "G"]
-
-    multi_nucleotides = [
-        "".join(kmer) for kmer in itertools.product(nucleotides, repeat=k)
-    ]
-
-    # build mapping from multi-nucleotide to index
-    tnf_index = {tn: i for i, tn in enumerate(multi_nucleotides)}
-
-    # Iterate over each sequence and update counts
-    embedding = np.zeros((len(dna_sequences), len(multi_nucleotides)))
-    for j, seq in enumerate(dna_sequences):
-        for i in range(len(seq) - k + 1):
-            multi_nuc = seq[i : i + k]
-            embedding[j, tnf_index[multi_nuc]] += 1
-
-    if kernel:
-        raise ValueError("Not Implemented!")
-
-    return embedding
-
-
-def calculate_llm_embedding(
-    dna_sequences, model_name_or_path, model_max_length=400, batch_size=20
-):
-    # reorder the sequences by length
-    lengths = [len(seq) for seq in dna_sequences]
-    idx = np.argsort(lengths)
-    dna_sequences = [dna_sequences[i] for i in idx]
-    tokenizer = transformers.AutoTokenizer.from_pretrained(
-        model_name_or_path,
-        cache_dir=None,
-        model_max_length=model_max_length,
-        padding_side="right",
-        use_fast=True,
-        trust_remote_code=True,
-    )
-
-    is_hyenadna = "hyenadna" in model_name_or_path
-    is_nt = "nucleotide-transformer" in model_name_or_path
-
-    if is_nt:
-        model = transformers.AutoModelForMaskedLM.from_pretrained(
-            model_name_or_path,
-            trust_remote_code=True,
-        )
-    else:
-        model = transformers.AutoModel.from_pretrained(
-            model_name_or_path,
-            trust_remote_code=True,
-        )
-
-    n_gpu = torch.cuda.device_count()
-    if n_gpu >= 1:
-        model = nn.DataParallel(model)
-        model.to("cuda")
-        n_cpu = 0
-    else:
-        model.to("cpu")
-        n_cpu = 1
-
-    train_loader = util_data.DataLoader(
-        dna_sequences,
-        batch_size=batch_size * (n_gpu + n_cpu),
-        shuffle=False,
-        num_workers=2 * (n_gpu + n_cpu),
-    )
-    for j, batch in enumerate(tqdm.tqdm(train_loader)):
-        with torch.no_grad():
-            token_feat = tokenizer.batch_encode_plus(
-                batch,
-                max_length=model_max_length,
-                return_tensors="pt",
-                padding="longest",
-                truncation=True,
-            )
-            input_ids = token_feat["input_ids"]
-            if not is_hyenadna:
-                attention_mask = token_feat["attention_mask"]
-            if n_gpu:
-                input_ids = input_ids.cuda()
-                if not is_hyenadna:
-                    attention_mask = attention_mask.cuda()
-
-            if is_hyenadna:
-                model_output = model.forward(input_ids=input_ids)[0].detach().cpu()
-                attention_mask = torch.ones(
-                    size=(model_output.shape[0], model_output.shape[1], 1), device="cpu"
-                )
-            else:
-                model_output = (
-                    model.forward(input_ids=input_ids, attention_mask=attention_mask)[0]
-                    .detach()
-                    .cpu()
-                )
-                attention_mask = attention_mask.unsqueeze(-1).detach().cpu()
-
-            embedding = torch.sum(model_output * attention_mask, dim=1) / torch.sum(
-                attention_mask, dim=1
-            )
-
-            if j == 0:
-                embeddings = embedding
-            else:
-                embeddings = torch.cat((embeddings, embedding), dim=0)
-
-    embeddings = np.array(embeddings.detach().cpu())
-
-    # reorder the embeddings
-    embeddings = embeddings[np.argsort(idx)]
-
-    return embeddings
 
 
 def KMedoid(
