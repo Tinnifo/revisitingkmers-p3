@@ -11,17 +11,19 @@
 # Choose the existing PyTorch container
 PYTORCH_CONTAINER=/ceph/container/pytorch/pytorch_25.10.sif
 
-cd /ceph/home/student.aau.dk/db56hw/revisitingkmers-p3
+# Your project directory on AI Lab
+PROJECT_DIR=/ceph/home/student.aau.dk/db56hw/revisitingkmers-p3
+cd "$PROJECT_DIR"
 
 echo "Creating virtual env..."
 singularity exec "$PYTORCH_CONTAINER" \
-    python -m venv --system-site-packages .venv
+    python -m venv .venv
 
 echo "Installing requirements..."
-singularity exec --nv \
-    -B .venv:/scratch/venv \
-    "$PYTORCH_CONTAINER" \
-    bash -c "source /scratch/venv/bin/activate && \
+singularity exec --nv "$PYTORCH_CONTAINER" \
+    bash -c "cd $PROJECT_DIR && \
+             source .venv/bin/activate && \
              pip install --no-cache-dir -r requirements.txt"
 
 echo "Done."
+
