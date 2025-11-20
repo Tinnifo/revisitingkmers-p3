@@ -1,7 +1,7 @@
 ````markdown
 # Revisiting K-mers — Sweep Workflow (AAU AI-Lab)
 
-This guide explains only **how to run sweeps** on AAU AI-Lab using the built-in scripts:
+This guide explains only how to run sweeps on AAU AI-Lab using the built-in scripts:
 
 - clone the repo  
 - configure optional W&B tracking  
