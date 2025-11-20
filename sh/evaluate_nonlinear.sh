@@ -36,7 +36,9 @@ mkdir -p "${RESULTS_FOLDER}/reference" "${RESULTS_FOLDER}/marine" "${RESULTS_FOL
 
 export PYTHONPATH=${PYTHONPATH}:${BASEFOLDER}
 
-singularity exec --nv "$PYTORCH_CONTAINER" \
+singularity exec --nv \
+    -B /ceph/project:/ceph/project \
+    "$PYTORCH_CONTAINER" \
     bash -lc "
         cd $BASEFOLDER && \
         for SPECIES in ${SPECIES_LIST[@]}; do

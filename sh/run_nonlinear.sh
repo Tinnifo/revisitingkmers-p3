@@ -41,7 +41,6 @@ echo "  Output model: $OUTPUT_PATH"
 
 cd "$BASEFOLDER"
 
-
 echo "Checking that data file exists inside job..."
 ls -l "$DATA_DIR"
 if [ ! -f "$DATA_DIR/train_2m.csv" ]; then
@@ -49,20 +48,22 @@ if [ ! -f "$DATA_DIR/train_2m.csv" ]; then
     exit 1
 fi
 
-
-# Run inside the PyTorch container
-singularity exec --nv "$PYTORCH_CONTAINER" python3 "$SCRIPT_PATH" \
-    --input "$DATA_DIR/train_2m.csv" \
-    --k "$K" \
-    --dim "$DIM" \
-    --neg_sample_per_pos "$NEGSAMPLEPERPOS" \
-    --max_read_num "$MAXREADNUM" \
-    --epoch "$EPOCHNUM" \
-    --lr "$LR" \
-    --batch_size "$BATCH_SIZE" \
-    --device "$DEVICE" \
-    --workers_num "$WORKERS_NUM" \
-    --loss_name "$LOSS_NAME" \
-    --output "$OUTPUT_PATH" \
-    --seed "$SEED" \
-    --checkpoint "$CHECKPOINT"
+# Run inside the PyTorch container (bind /ceph/project so data is visible)
+singularity exec --nv \
+    -B /ceph/project:/ceph/project \
+    "$PYTORCH_CONTAINER" \
+    python3 "$SCRIPT_PATH" \
+        --input "$DATA_DIR/train_2m.csv" \
+        --k "$K" \
+        --dim "$DIM" \
+        --neg_sample_per_pos "$NEGSAMPLEPERPOS" \
+        --max_read_num "$MAXREADNUM" \
+        --epoch "$EPOCHNUM" \
+        --lr "$LR" \
+        --batch_size "$BATCH_SIZE" \
+        --device "$DEVICE" \
+        --workers_num "$WORKERS_NUM" \
+        --loss_name "$LOSS_NAME" \
+        --output "$OUTPUT_PATH" \
+        --seed "$SEED" \
+        --checkpoint "$CHECKPOINT"
