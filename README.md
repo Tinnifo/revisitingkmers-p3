@@ -59,7 +59,7 @@ Replace with your AAU email.
 
 ---
 
-# 3. (Optional) Enable Weights & Biases
+# 3. Enable Weights & Biases
 
 Add your API key:
 
@@ -107,7 +107,7 @@ This will:
 
 ---
 
-# 5. Override Hyperparameters (Full Control)
+# 5. Override Hyperparameters 
 
 You can override **any** parameter list directly when launching the sweep.
 
@@ -226,9 +226,4 @@ F --> G[EVAL job runs\nevaluation/binning.py → metrics saved]
 
 E -->|if W&B enabled| H[wandb.log training]
 G -->|if W&B enabled| I[wandb.log evaluation]
-```
-
-
-
-If you want a second version that is even shorter (one-page quickstart), I can write that too.
 ```
