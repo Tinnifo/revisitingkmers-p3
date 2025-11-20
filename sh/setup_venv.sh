@@ -8,16 +8,19 @@
 #SBATCH --mail-type=END,FAIL
 #SBATCH --mail-user=tolaso24@student.aau.dk
 
+# Choose the existing PyTorch container
+PYTORCH_CONTAINER=/ceph/container/pytorch/pytorch_25.10.sif
+
 cd /ceph/home/student.aau.dk/db56hw/revisitingkmers-p3
 
 echo "Creating virtual env..."
-singularity exec /ceph/container/pytorch/pytorch_24.09.sif \
+singularity exec "$PYTORCH_CONTAINER" \
     python -m venv --system-site-packages .venv
 
 echo "Installing requirements..."
 singularity exec --nv \
     -B .venv:/scratch/venv \
-    /ceph/container/pytorch/pytorch_24.09.sif \
+    "$PYTORCH_CONTAINER" \
     bash -c "source /scratch/venv/bin/activate && \
              pip install --no-cache-dir -r requirements.txt"
 
