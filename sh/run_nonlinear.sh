@@ -7,15 +7,15 @@
 #SBATCH --mem=64G
 #SBATCH --time=0-01:00:00
 #SBATCH --mail-type=ALL
-#SBATCH --mail-user=tolaso24@student.aau.dk
-#SBATCH --container-image=/ceph/container/pytorch/pytorch_25.10.sif
+#SBATCH --mail-user=db56hw@student.aau.dk
 
+PYTORCH_CONTAINER=/ceph/container/pytorch/pytorch_25.10.sif
 BASEFOLDER=/ceph/home/student.aau.dk/db56hw/revisitingkmers-p3
 DATA_DIR=/ceph/project/p3-kmer/dataset
 SCRIPT_PATH=$BASEFOLDER/src/nonlinear.py
 MODELNAME=nonlinear
 
-# Hyperparameters (overridable)
+# Hyperparameters (overridable from the command line)
 K=${K:-4}
 DIM=${DIM:-256}
 EPOCHNUM=${EPOCHNUM:-300}
@@ -41,7 +41,8 @@ echo "  Output model: $OUTPUT_PATH"
 
 cd "$BASEFOLDER"
 
-python "$SCRIPT_PATH" \
+# Run inside the PyTorch container
+singularity exec --nv "$PYTORCH_CONTAINER" python3 "$SCRIPT_PATH" \
     --input "$DATA_DIR/train_2m.csv" \
     --k "$K" \
     --dim "$DIM" \
