@@ -2,13 +2,14 @@
 #SBATCH --job-name=MODEL
 #SBATCH --output=%x_%j.out
 #SBATCH --error=%x_%j.err
-#SBATCH --partition=batch
+# no --partition line (GPU jobs must not specify a partition)
 #SBATCH --cpus-per-task=4
 #SBATCH --gres=gpu:1
 #SBATCH --mem=64G
 #SBATCH --time=0-12:00:00
 #SBATCH --mail-type=ALL
-#SBATCH --mail-user=db56hw@student.aau.dk
+#SBATCH --mail-user=tolaso24@student.aau.dk
+
 
 MODELNAME=nonlinear
 BASEFOLDER=/ceph/home/student.aau.dk/db56hw/revisitingkmers-p3
@@ -30,7 +31,7 @@ MAXREADNUM=${MAXREADNUM:-100000}
 SEED=${SEED:-26042024}
 CHECKPOINT=${CHECKPOINT:-0}
 LOSS_NAME=${LOSS_NAME:-"bern"}
-WORKERS_NUM=${WORKERS_NUM:-8}
+WORKERS_NUM=${WORKERS_NUM:-4}
 DEVICE=${DEVICE:-"cuda"}
 POSTFIX=${POSTFIX:-""}
 # ----------------------------------------------------------------------

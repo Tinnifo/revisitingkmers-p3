@@ -2,18 +2,17 @@
 #SBATCH --job-name=MODEL
 #SBATCH --output=%x_%j.out
 #SBATCH --error=%x_%j.err
-#SBATCH --partition=batch
+# No --partition line (let Slurm pick the default partition)
 #SBATCH --cpus-per-task=4
-#SBATCH --gres=gpu:1
-#SBATCH --mem=64G
+#SBATCH --mem=256G
 #SBATCH --time=0-12:00:00
 #SBATCH --mail-type=ALL
-#SBATCH --mail-user=db56hw@student.aau.dk
+#SBATCH --mail-user=tolaso24@student.aau.dk
 
 MODELNAME=nonlinear
 BASEFOLDER=/ceph/home/student.aau.dk/db56hw/revisitingkmers-p3
 VENV=$BASEFOLDER/.venv
-CONTAINER=/ceph/container/pytorch/pytorch_24.09.sif
+CONTAINER=/ceph/container/python/python_3.10.sif
 
 SCRIPT_PATH=$BASEFOLDER/src/nonlinear.py
 DATA_DIR=/ceph/project/p3-kmer/dataset
@@ -31,7 +30,7 @@ SEED=${SEED:-26042024}
 CHECKPOINT=${CHECKPOINT:-0}
 LOSS_NAME=${LOSS_NAME:-"bern"}
 WORKERS_NUM=${WORKERS_NUM:-1}
-DEVICE=${DEVICE:-"cuda"}
+DEVICE=${DEVICE:-"cpu"}
 POSTFIX=${POSTFIX:-""}
 # ----------------------------------------------------------------------
 
@@ -54,7 +53,7 @@ echo "Running with:"
 echo "  K=$K DIM=$DIM LR=$LR BATCH_SIZE=$BATCH_SIZE MAXREADNUM=$MAXREADNUM SEED=$SEED"
 echo "  Using Weights & Biases: $USE_WANDB (project=$WANDB_PROJECT, run=$WANDB_RUN_NAME)"
 
-singularity exec --nv \
+singularity exec \
     -B "$VENV":/scratch/venv \
     -B "$DATA_DIR":/scratch/dataset \
     "$CONTAINER" \
