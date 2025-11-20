@@ -5,15 +5,14 @@
 #SBATCH --cpus-per-task=4
 #SBATCH --gres=gpu:1
 #SBATCH --mem=64G
-#SBATCH --time=0-12:00:00
+#SBATCH --time=0-01:00:00
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=tolaso24@student.aau.dk
+#SBATCH --container-image=/ceph/container/pytorch/pytorch_25.10.sif
 
-PYTORCH_CONTAINER=/ceph/container/pytorch/pytorch_25.10.sif
 BASEFOLDER=/ceph/home/student.aau.dk/db56hw/revisitingkmers-p3
-SCRIPT_PATH=$BASEFOLDER/src/nonlinear.py
 DATA_DIR=/ceph/project/p3-kmer/dataset
-
+SCRIPT_PATH=$BASEFOLDER/src/nonlinear.py
 MODELNAME=nonlinear
 
 # Hyperparameters (overridable)
@@ -40,22 +39,20 @@ echo "Running model with:"
 echo "  K=$K DIM=$DIM LR=$LR BATCH_SIZE=$BATCH_SIZE MAXREADNUM=$MAXREADNUM SEED=$SEED"
 echo "  Output model: $OUTPUT_PATH"
 
-singularity exec --nv "$PYTORCH_CONTAINER" \
-    bash -lc "
-        cd $BASEFOLDER && \
-        python $SCRIPT_PATH \
-            --input $DATA_DIR/train_2m.csv \
-            --k $K \
-            --dim $DIM \
-            --neg_sample_per_pos $NEGSAMPLEPERPOS \
-            --max_read_num $MAXREADNUM \
-            --epoch $EPOCHNUM \
-            --lr $LR \
-            --batch_size $BATCH_SIZE \
-            --device $DEVICE \
-            --workers_num $WORKERS_NUM \
-            --loss_name $LOSS_NAME \
-            --output $OUTPUT_PATH \
-            --seed $SEED \
-            --checkpoint $CHECKPOINT
-    "
+cd "$BASEFOLDER"
+
+python "$SCRIPT_PATH" \
+    --input "$DATA_DIR/train_2m.csv" \
+    --k "$K" \
+    --dim "$DIM" \
+    --neg_sample_per_pos "$NEGSAMPLEPERPOS" \
+    --max_read_num "$MAXREADNUM" \
+    --epoch "$EPOCHNUM" \
+    --lr "$LR" \
+    --batch_size "$BATCH_SIZE" \
+    --device "$DEVICE" \
+    --workers_num "$WORKERS_NUM" \
+    --loss_name "$LOSS_NAME" \
+    --output "$OUTPUT_PATH" \
+    --seed "$SEED" \
+    --checkpoint "$CHECKPOINT"
