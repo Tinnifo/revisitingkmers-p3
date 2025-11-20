@@ -1,7 +1,6 @@
 # This script has been adapted from the file available at the following address:
 # https://github.com/MAGICS-LAB/DNABERT_S/blob/main/evaluate/eval_binning.py
 import numpy as np
-import transformers
 import torch
 import torch.utils.data as util_data
 import torch.nn as nn
