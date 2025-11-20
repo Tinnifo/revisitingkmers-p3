@@ -14,21 +14,22 @@ SCRIPT_PATH=$BASEFOLDER/evaluation/binning.py
 RESULTS_FOLDER=$BASEFOLDER/results
 DATA_DIR=/ceph/project/p3-kmer/dataset
 
-POSTFIX=""
-K=4
-DIM=256
-EPOCHNUM=300
-LR=0.001
-NEGSAMPLEPERPOS=200
-BATCH_SIZE=10000
-MAXREADNUM=100000
+# Hyperparameters must match the TRAINED MODEL you want to evaluate
+K=${K:-4}
+DIM=${DIM:-256}
+EPOCHNUM=${EPOCHNUM:-300}
+LR=${LR:-0.001}
+NEGSAMPLEPERPOS=${NEGSAMPLEPERPOS:-200}
+BATCH_SIZE=${BATCH_SIZE:-10000}
+MAXREADNUM=${MAXREADNUM:-100000}
+POSTFIX=${POSTFIX:-""}
 MODELNAME="nonlinear"
 
 MODELNAME=${MODELNAME}_train_2m_k=${K}_d=${DIM}_negsampleperpos=${NEGSAMPLEPERPOS}
 MODELNAME=${MODELNAME}_epoch=${EPOCHNUM}_LR=${LR}_batch=${BATCH_SIZE}_maxread=${MAXREADNUM}${POSTFIX}
 
 MODEL_PATH=$BASEFOLDER/models/${MODELNAME}.model
-SPECIES_LIST=("reference")   # later: "plant" "marine"
+SPECIES_LIST=("reference")   # later: add "plant" "marine"
 MODELLIST=nonlinear
 
 mkdir -p "${RESULTS_FOLDER}/reference" "${RESULTS_FOLDER}/marine" "${RESULTS_FOLDER}/plant"
