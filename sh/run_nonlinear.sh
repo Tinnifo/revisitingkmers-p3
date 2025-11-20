@@ -7,7 +7,7 @@
 #SBATCH --mem=64G
 #SBATCH --time=0-01:00:00
 #SBATCH --mail-type=ALL
-#SBATCH --mail-user=db56hw@student.aau.dk
+#SBATCH --mail-user=tolaso24@student.aau.dk
 
 PYTORCH_CONTAINER=/ceph/container/pytorch/pytorch_25.10.sif
 BASEFOLDER=/ceph/home/student.aau.dk/db56hw/revisitingkmers-p3
@@ -40,6 +40,15 @@ echo "  K=$K DIM=$DIM LR=$LR BATCH_SIZE=$BATCH_SIZE MAXREADNUM=$MAXREADNUM SEED=
 echo "  Output model: $OUTPUT_PATH"
 
 cd "$BASEFOLDER"
+
+
+echo "Checking that data file exists inside job..."
+ls -l "$DATA_DIR"
+if [ ! -f "$DATA_DIR/train_2m.csv" ]; then
+    echo "ERROR: $DATA_DIR/train_2m.csv NOT FOUND"
+    exit 1
+fi
+
 
 # Run inside the PyTorch container
 singularity exec --nv "$PYTORCH_CONTAINER" python3 "$SCRIPT_PATH" \
