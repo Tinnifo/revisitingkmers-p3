@@ -30,7 +30,7 @@ MAXREADNUM=${MAXREADNUM:-100000}
 SEED=${SEED:-26042024}
 CHECKPOINT=${CHECKPOINT:-0}
 LOSS_NAME=${LOSS_NAME:-"bern"}
-WORKERS_NUM=${WORKERS_NUM:-1}
+WORKERS_NUM=${WORKERS_NUM:-8}
 DEVICE=${DEVICE:-"cuda"}
 POSTFIX=${POSTFIX:-""}
 # ----------------------------------------------------------------------
