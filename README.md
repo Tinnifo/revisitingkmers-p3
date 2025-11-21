@@ -17,7 +17,8 @@ You only change:
 - optional W&B settings  
 - optional hyperparameter ranges when launching a sweep  
 
-IMPORTANT! You do not need to upload the datasets to AI Lab. They have been uploaded in the AI Lab project folder under /ceph/project/p3-kmer/dataset
+IMPORTANT! You do not need to upload the datasets to AI Lab.
+They have been uploaded in AI Lab project folder under /ceph/project/p3-kmer/dataset
 ---
 
 ## 1. Clone the Repository on AI-Lab
