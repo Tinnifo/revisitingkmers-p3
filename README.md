@@ -203,5 +203,3 @@ results/<species>/
 
 **W&B dashboard**
 Check your online W&B project for experiment logs and metrics.
-
-```
