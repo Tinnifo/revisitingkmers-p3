@@ -132,6 +132,29 @@ def get_embedding(
     return embedding
 
 
+
+def calculate_tnf(dna_sequences, kernel=False, k=4):
+    # Define all possible tetra-nucleotides
+    nucleotides = ['A', 'T', 'C', 'G']
+
+    multi_nucleotides = [''.join(kmer) for kmer in itertools.product(nucleotides, repeat=k)]
+
+    # build mapping from multi-nucleotide to index
+    tnf_index = {tn: i for i, tn in enumerate(multi_nucleotides)}
+
+    # Iterate over each sequence and update counts
+    embedding = np.zeros((len(dna_sequences), len(multi_nucleotides)))
+    for j, seq in enumerate(dna_sequences):
+        for i in range(len(seq) - k + 1):
+            multi_nuc = seq[i:i + k]
+            embedding[j, tnf_index[multi_nuc]] += 1
+
+    if kernel:
+        raise ValueError("Not Implemented!")
+
+    return embedding
+
+
 def KMedoid(
     features,
     min_similarity=0.8,
