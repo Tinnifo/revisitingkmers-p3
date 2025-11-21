@@ -55,7 +55,7 @@ Replace with your AAU email.
 
 ---
 
-## 3. Enable Weights & Biases (Optional)
+## 3. Enable Weights & Biases 
 
 Add your API key:
 
@@ -82,24 +82,6 @@ srun --mem=8G --time=00:05:00 \
   singularity exec --nv /ceph/container/pytorch/pytorch_24.09.sif \
   pip install --user wandb
 ```
-
----
-
-## 4. Run the Default Sweep
-
-Inside the repo:
-
-```bash
-sh sh/sweep_nonlinear.sh
-```
-
-This will:
-
-* loop over default hyperparameter lists
-* create a unique W&B run ID for each combo
-* submit a training job
-* automatically submit a dependent evaluation job
-* log both phases to the same W&B run (if enabled)
 
 ---
 
